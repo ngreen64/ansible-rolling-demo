@@ -1,0 +1,10 @@
+---
+- hosts: webservers
+  tasks:
+    - name: Make certain latest version of Apache is installed
+      yum: name=httpd state=absent
+    - firewalld: service=http permanent=true state=disabled immediate=true
+    - shell: rm /etc/motd
+    - user: name=johnd comment="John Doe" uid=1040 group=users state=absent remove=yes
+    - lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=enforcing
+    - mount: name=/mnt src=/dev/cdrom fstype=iso9660 state=unmounted opts=ro

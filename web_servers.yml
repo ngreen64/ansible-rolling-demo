@@ -1,0 +1,10 @@
+---
+- hosts: webservers
+  tasks:
+    - name: Make certain latest version of Apache is installed
+      yum: name=httpd state=latest
+    - service: name=httpd state=started enabled=yes
+    - firewalld: service=http permanent=true state=enabled immediate=true
+    - copy: src=standard_index.html dest=/var/www/html/index.html owner=apache group=apache mode=0644
+    - copy: src=quickfox.html dest=/var/www/html/fox.html owner=apache group=apache mode=0644
+    - lineinfile: dest=/var/www/html/index.html regexp=XXXX line='Welcome to web server {{ inventory_hostname }}'

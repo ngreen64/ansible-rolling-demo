@@ -1,0 +1,58 @@
+---
+- hosts: all
+  tasks:
+    - hostname: name={{ inventory_hostname }}
+      tags:
+      - configuration
+    - redhat_subscription: state=absent
+      tags:
+      - subscription
+    - shell: /usr/sbin/subscription-manager clean
+      tags:
+      - subscription
+    - redhat_subscription: state=present
+                           activationkey=Employee_SKU_virt
+                           org_id=7847483
+                           pool='^Red Hat Enterprise Server$'
+                           autosubscribe=yes
+      tags:
+      - subscription
+    - shell: /usr/sbin/subscription-manager repos --disable=*
+      tags:
+      - subscription
+    - shell: /usr/sbin/subscription-manager repos --enable=rhel-7-server-rpms
+      tags:
+      - subscription
+    - shell: echo "======= Standard MOTD file =======" > /etc/motd
+      tags:
+      - configuration
+    - name: "Install Common RPMS"
+      yum: state=present name={{ item }}
+      with_items:
+      - bash-completion
+      - tcpdump
+      - vim
+      - nmap-ncat
+      - bind-utils
+      - chrony
+      - NetworkManager-glib
+      - nm-connection-editor
+      - libsemanage-python
+      - policycoreutils-python
+      tags:
+      - packages
+    - service: name=chronyd state=started enabled=yes
+      tags:
+      - services
+    - user: name=johnd comment="John Doe" uid=1040 group=users
+      tags:
+      - configuration
+    - lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=enforcing
+      tags:
+      - configuration
+    - nmcli: type=ethernet conn_name=enp0s3 dns4="10.0.2.16" state=present
+      tags:
+      - configuration
+    - shell: /bin/nmcli c reload; /bin/nmcli c d enp0s3; /bin/nmcli c u enp0s3 
+      tags:
+      - configuration

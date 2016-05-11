@@ -1,0 +1,31 @@
+---
+- hosts: all
+  tasks: []
+
+- hosts: webservers
+  serial: 1
+# These tasks run before content update:
+  pre_tasks:	
+  - name: take server out of load balancer pool
+    haproxy: "state=disabled host={{ inventory_hostname.split('.')[0] }} backend=app socket=/var/run/haproxy.sock shutdown_sessions=true"
+    delegate_to: "{{ item }}"
+    with_items: '{{groups.proxies}}'
+   
+# Making the update to the web server goes here
+  tasks: 
+  - name: Stop the webserver
+    service: name=httpd state=stopped
+  - name: Update the fox.html files with whatever is in ./updates
+    copy: src=./updates/fox.html dest=/var/www/html/fox.html owner=apache group=apache mode=0644
+  - name: Start the webserver
+    service: name=httpd state=started
+
+# These tasks run after content update:
+  post_tasks:
+  - name: wait for webserver to come up
+    wait_for: 'host={{ inventory_hostname }} port=80 state=started timeout=80'
+
+  - name: enable the server in haproxy
+    haproxy: "state=enabled backend=app host={{ inventory_hostname.split('.')[0] }} socket=/var/run/haproxy.sock"
+    delegate_to: "{{ item }}"
+    with_items: '{{groups.proxies}}'
