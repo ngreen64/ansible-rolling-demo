@@ -16,5 +16,13 @@ The code included here are Ansible playbooks to configure the target hosts;
 
 # In order to use these files
 1. Create a RHEL 7 Ansible Tower host
-2. Deploy the code to /var/lib/awx
-3. TBC
+2. Create a new SCM project and point the URL towards this GitHub location
+3. Within the Inventory create a group such as "WebFarm", create the subgroups "proxies" and "webservers" beneath this
+4. Register the clients within the appropriate groups
+5. Create jobs for the following playbooks (all jobs should run against the 'WebFarm' group)
+   - apply_standard_build.yml
+   - haproxy.yml
+   - remove_web.yml
+   - update_web_content.yml
+   - web_servers.yml
+
