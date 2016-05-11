@@ -27,7 +27,7 @@
     - file: path=/var/named/data/example.com state=touch owner=named group=named mode="u=rw,g=r,o=r"
     - name: ensure that the example.com zone file is correctly configured
       lineinfile:
-        dest: /etc/named.conf
+        dest: /var/named/data/example.com
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
       with_items:
