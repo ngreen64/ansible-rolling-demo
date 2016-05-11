@@ -1,4 +1,4 @@
-# anisble-rolling-demo
+# ansible-rolling-demo
 This project aims to demostrate the ability of ansible to...
 1. Perform basic tasks such as registering servers, applying standard configuration and packages
 2. Configuring clients to perform specific tasks; e.g. Web Servers
