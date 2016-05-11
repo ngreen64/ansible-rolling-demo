@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  tasks:
+    - name: make certain bind is installed on this host and is serving to clients
+      yum: name=bind state=latest
+    - name: ensure that named is correctly configured
+      lineinfile:
+        dest: /etc/named.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '[\s]listen-on[\s]', line: '\tlisten-on port 53 { any; };' }
+        - { regexp: '[\s]allow-query[\s]', line: '\tallow-query      { any; };' }
+        - { regexp: '[\s]forwarders[\s][\s\S]*}\;', line: '\tforwarders { 8.8.8.8; 8.8.4.4; };' }
+      notify:
+      - restart named
+    - name: Ensure example.com domain is present
+      blockinfile:
+        dest: /etc/named.conf
+        content: |
+          zone "example.com" IN {
+            type master;
+            file "data/example.com";
+          };
+      notify:
+      - restart named
+  handlers:
+    - name: restart named
+      service: name=named state=restarted
