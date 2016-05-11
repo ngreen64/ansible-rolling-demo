@@ -24,6 +24,17 @@
           };
       notify:
       - restart named
+    - file: path=/var/named/data/example.com state=touch owner=named group=named mode="u=rw,g=r,o=r"
+    - name: ensure that the example.com zone file is correctly configured
+      lineinfile:
+        dest: /etc/named.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^@', line: "@ in soa localhost. root 1 3H 15M 1W 1D" }
+        - { regexp: '[\s]ns[\s]', line: "  ns localhost." }
+      notify:
+      - restart named
   handlers:
     - name: restart named
       service: name=named state=restarted
