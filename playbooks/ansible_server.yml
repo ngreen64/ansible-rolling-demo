@@ -5,7 +5,7 @@
 - hosts: localhost
   vars:
     zonename:
-    - example.com
+    - "example.com"
   tasks:
     - name: make certain bind is installed on this host and is serving to clients
       yum: name=bind state=latest
