@@ -16,7 +16,7 @@
   - name: Stop the webserver
     service: name=httpd state=stopped
   - name: Update the fox.html files with whatever is in ./updates
-    copy: src=../updates/example_new.html dest=/var/www/html/example.html owner=apache group=apache mode=0644
+    copy: src=../files/updates/example_new.html dest=/var/www/html/example.html owner=apache group=apache mode=0644
   - name: Start the webserver
     service: name=httpd state=started
 
