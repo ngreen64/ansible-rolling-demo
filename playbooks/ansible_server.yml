@@ -38,7 +38,7 @@
       notify:
       - restart named
     - name: ensure that firewalld allows for DNS lookups against this server
-      firewalld: service=dns permanent=true state=enabled
+      firewalld: service=dns permanent=true state=enabled immediate=yes
   handlers:
     - name: restart named
       service: name=named state=restarted
