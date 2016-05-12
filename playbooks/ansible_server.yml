@@ -37,8 +37,8 @@
         - { regexp: '[\s]ns[\s]', line: "  ns localhost." }
       notify:
       - restart named
-    -name: ensure that firewalld allows for DNS lookups against this server
-     firewalld: service=dns permanent=true state=enabled
+    - name: ensure that firewalld allows for DNS lookups against this server
+      firewalld: service=dns permanent=true state=enabled
   handlers:
     - name: restart named
       service: name=named state=restarted
