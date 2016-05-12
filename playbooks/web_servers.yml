@@ -5,6 +5,6 @@
       yum: name=httpd state=latest
     - service: name=httpd state=started enabled=yes
     - firewalld: service=http permanent=true state=enabled immediate=true
-    - copy: src=./files/initial/standard_index.html dest=/var/www/html/index.html owner=apache group=apache mode=0644
-    - copy: src=./files/initial/example.html dest=/var/www/html/example.html owner=apache group=apache mode=0644
+    - copy: src=../initial/standard_index.html dest=/var/www/html/index.html owner=apache group=apache mode=0644
+    - copy: src=../initial/example.html dest=/var/www/html/example.html owner=apache group=apache mode=0644
     - lineinfile: dest=/var/www/html/index.html regexp=XXXX line='Welcome to web server {{ inventory_hostname }}'
