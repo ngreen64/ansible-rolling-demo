@@ -1,7 +1,4 @@
 ---
-- hosts: all
-  tasks: []
-  
 - hosts: localhost
   vars:
     zonename: "example.com"
