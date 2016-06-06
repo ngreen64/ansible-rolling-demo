@@ -1,0 +1,61 @@
+- hosts: webservers
+  vars:
+    servicename: httpd
+    serviceport: 80
+    monthnumber: {{ ansible_date_time.month }}
+    satellite_server: sat1.example.com
+    rhnuser = {{ myrhnuser }}
+    rhnpass = {{ an_encrypted_password }}
+  serial: 1
+  any_errors_fatal: True
+  max_fail_percentage: 1
+
+# These tasks run before content update:
+  pre_tasks:
+  - name: take server out of load balancer pool
+    haproxy: "state=disabled host={{ inventory_hostname.split('.')[0] }} backend=app socket=/var/run/haproxy.sock shutdown_sessions=true"
+    delegate_to: "{{ item }}"
+    with_items: '{{ groups.proxies }}'
+
+# Making the update to the web server goes here
+  tasks:
+  - name: Shutdown the service that this server provides
+    service: name={{ servicename }} state=stopped
+
+  - name: Install patches
+    yum: name=* state=latest
+
+  - name: Determine whether a reboot is required and reboot if necessary
+    shell:
+      LAST_KERNEL=$(rpm -q --last kernel | head -1 | awk '{print $1}');
+      CURRENT_KERNEL=kernel-$(uname -r);
+      if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
+    ignore_errors: true
+    register: reboot_hint
+
+  - name: restart machine
+    command: shutdown -r now "Ansible updated kernel. Reboot triggered."
+    async: 0
+    poll: 0
+    ignore_errors: true
+    register: rebooting
+    when: reboot_hint.stdout.find("reboot") != -1
+    register: rebooting
+
+  - name: Wait for server to reboot if it had been restarted
+    local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300
+    sudo: false
+    when: rebooting
+
+  - name: Ensure that stopped service has been restarted
+    service: name={{ servicename }} state=started
+
+# These tasks run after content update:
+  post_tasks:
+  - name: Wait for server service to be up and running
+    wait_for: 'host={{ inventory_hostname }} port={{ serviceport }} state=started timeout=30'
+
+  - name: enable the server in haproxy
+    haproxy: "state=enabled backend=app host={{ inventory_hostname.split('.')[0] }} socket=/var/run/haproxy.sock"
+    delegate_to: "{{ item }}"
+    with_items: '{{groups.proxies}}'
