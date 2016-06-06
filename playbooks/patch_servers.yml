@@ -2,10 +2,6 @@
   vars:
     servicename: httpd
     serviceport: 80
-    monthnumber: {{ ansible_date_time.month }}
-    satellite_server: sat1.example.com
-    rhnuser = {{ myrhnuser }}
-    rhnpass = {{ an_encrypted_password }}
   serial: 1
   any_errors_fatal: True
   max_fail_percentage: 1
