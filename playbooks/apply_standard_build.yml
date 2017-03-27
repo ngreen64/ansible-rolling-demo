@@ -17,6 +17,7 @@
                            autosubscribe=yes
       tags:
       - subscription
+      ignore_errors: true
     - shell: /usr/sbin/subscription-manager repos --disable=*
       tags:
       - subscription
