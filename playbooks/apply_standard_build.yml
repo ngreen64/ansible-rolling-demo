@@ -1,32 +1,17 @@
 ---
 - hosts: all
   tasks:
-    - hostname: name={{ inventory_hostname }}
+    - name: Set the hostname as defined in the inventory
+      hostname: name={{ inventory_hostname }}
       tags:
       - configuration
-    - redhat_subscription: state=absent
-      tags:
-      - subscription
-    - shell: /usr/sbin/subscription-manager clean
-      tags:
-      - subscription
-    - redhat_subscription: state=present
-                           activationkey=Employee_SKU_virt
-                           org_id=7847483
-                           pool='^Red Hat Enterprise Server$'
-                           autosubscribe=yes
-      tags:
-      - subscription
-      ignore_errors: true
-    - shell: /usr/sbin/subscription-manager repos --disable=*
-      tags:
-      - subscription
-    - shell: /usr/sbin/subscription-manager repos --enable=rhel-7-server-rpms
-      tags:
-      - subscription
-    - shell: echo "======= Standard MOTD file =======" > /etc/motd
-      tags:
+      
+    - name: Configure MOTD file
+      template:
+        src: motd.j2
+        dest: /etc/motd
       - configuration
+      
     - name: "Install Common RPMS"
       yum: state=present name={{ item }}
       with_items:
@@ -42,18 +27,19 @@
       - policycoreutils-python
       tags:
       - packages
-    - service: name=chronyd state=started enabled=yes
+    
+    - name: Ensure that the chronyd services is started
+      service: name=chronyd state=started enabled=yes
       tags:
       - services
-    - user: name=johnd comment="John Doe" uid=1040 group=users
+      
+    - name: Ensure a default user is present  
+      user: name=johnd comment="John Doe" uid=1040 group=users
       tags:
       - configuration
-    - lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=enforcing
+      
+    - name: Make certain SELinux is set to enforcing  
+      lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=enforcing
       tags:
       - configuration
-    - nmcli: type=ethernet conn_name=enp0s3 dns4="10.0.2.16" state=present
-      tags:
-      - configuration
-    - shell: /bin/nmcli c reload; /bin/nmcli c d enp0s3; /bin/nmcli c u enp0s3 
-      tags:
-      - configuration
+  
