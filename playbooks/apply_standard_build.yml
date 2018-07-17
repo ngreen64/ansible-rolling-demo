@@ -10,6 +10,7 @@
       template:
         src: motd.j2
         dest: /etc/motd
+      tags:
       - configuration
       
     - name: "Install Common RPMS"
